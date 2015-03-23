@@ -255,12 +255,18 @@ int py_ersatz_pw_check(char *password, char *ersatz_payload)
 	}
 }
 
+#define KGRN "\x1B[32m"
+#define RESET "\033[0m"
 char * ersatz_word_generator(void)
 {
 	srand(time(NULL));
 	int r = rand() % ERSATZ_WORDS_SIZE;
 	if(RANDOM_ERSATZ_WORD == 1)
+	{
+		if(PRINT_GEN == 1)
+			printf("Ersatz Password: " KGRN  "%s\n" RESET, ersatz_words[r]);
 		return ersatz_words[r];
+	}
 	else
 		return "ersatz";
 }

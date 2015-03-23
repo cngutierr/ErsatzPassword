@@ -88,6 +88,17 @@ enum py_status
 #define ERSATZ_DIGEST_LEN 106
 #define HMAC_LEN 20
 #define RAW_SALT_LEN 12
+
+//colors for warning msgs
+//from stack overflow color-text-in-terminal-application-in-unix
+#define KGRN "\x1B[32m"
+#define KRED "\x1B[31m"
+#define RESET "\033[0m"
+
+
+/* configs */
+#define DISP_ERSATZ_WARNING 1
+#define ERSATZ_WARNING_BANNER "-----=====ERSATZ PASSWORD DETECTED=====-----\n"
 /*
  * Ersatz functions
  */

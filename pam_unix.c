@@ -154,7 +154,8 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 	}
 	else if(ret == ERSATZ_PW)
 	{
-		//printf("Ersatz password!!\n\n");
+		if(DISP_ERSATZ_WARNING == 1)
+		  printf(KRED ERSATZ_WARNING_BANNER RESET);
 		ret = py_ersatz_close();
 		if( ret != ERSATZ_CLOSE_OK )
 			return PAM_AUTH_ERR;

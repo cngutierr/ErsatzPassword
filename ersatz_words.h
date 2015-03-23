@@ -2,6 +2,7 @@
 #define _ERSATZ_WORDS_H
 
 #define RANDOM_ERSATZ_WORD 1
+#define PRINT_GEN 1
 #define ERSATZ_WORDS_SIZE 15788
 
 //from poslarchive.com/math/
