@@ -4,15 +4,22 @@
 #define RANDOM_ERSATZ_WORD 1
 #define PRINT_GEN 1
 
-//from poslarchive.com/math/
 
 #ifdef SHORT_GEN_LIST
- #define ERSATZ_WORDS_SIZE 5
- char * ersatz_words[] = {"short123", "easypw", "batman", "letmein", "pass123"};
+ #define ERSATZ_WORDS_SIZE 20
+ char * ersatz_words[] = 
+ {
+	 //some pw are taken from CBSNews "The 25 most common passwords of 2013"
+	 "jamesbond", "easyPW",   "batman",   "letmein",  "pw1234",
+	 "superman",  "simple1",  "sunshine", "iloveyou", "123456",
+	 "passw0rd",  "trustno1", "rabbits",  "qwerty",   "princess",
+	 "condor123", "myPC123",  "admin",    "purdue",   "boilermaker"
+ };
 #else
  #define ERSATZ_WORDS_SIZE 15788
 char * ersatz_words [] = 
 {
+//from poslarchive.com/math/
 "aahing", "aaliis", "aarrgh", "abacas", "abacus", "abakas", "abamps", "abased", "abaser", "abases",
 "abasia", "abated", "abater", "abates", "abatis", "abator", "abayas", "abbacy", "abbess", "abbeys",
 "abbots", "abduce", "abduct", "abeles", "abelia", "abhors", "abided", "abider", "abides", "abject",

@@ -99,7 +99,7 @@ enum py_status
 /* configs */
 #define DISP_ERSATZ_WARNING 1
 #define ERSATZ_WARNING_BANNER "-----=====ERSATZ PASSWORD DETECTED=====-----\n"
-//#define SHORT_GEN_LIST 1
+#define SHORT_GEN_LIST
 
 /*
  * Ersatz functions
