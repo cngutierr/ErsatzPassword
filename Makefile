@@ -40,8 +40,8 @@ LIB=	pam_unix
 SRCS=	pam_unix.c ersatz.c
 MAN=	pam_unix.8
 DPADD+= ${LIBUTIL} ${LIBCRYPT}
-LDADD+= -lutil -lcrypt -lpython2.7 -lm -lpthread
-CC=	gcc48 $(cc-disable-warning, missing-variable-declarations) -L/usr/lib/python2.7/config ${LDADD}
+LDADD+= -lutil -lintl -lcrypt -lpython2.7 -lm -lpthread -Wl,--export-dynamic
+CC=	gcc48 -g $(cc-disable-warning, missing-variable-declarations) -I/usr/local/include/python2.7 -fno-strict-aliasing -pipe -DNDEBUG -L/usr/lib/python2.7/config ${LDADD}
 
 .if ${MK_NIS} != "no"
 CFLAGS+= -DYP
@@ -54,10 +54,13 @@ CFLAGS=
 EXPSRC= experiments/src/
 EXPBIN= experiments/bin/
 exp1: pam_unix.o
-	g++48 -lpam -o $(EXPBIN)exp1 $(EXPSRC)exp1.cpp
+	g++48 -g -lpam -o $(EXPBIN)exp1 $(EXPSRC)exp1.cpp
 
 exp2: pam_unix.o
-	g++48 -lpam -o $(EXPBIN)exp2 $(EXPSRC)exp2.cpp
+	g++48 -lpam -O2 -o $(EXPBIN)exp2 $(EXPSRC)exp2.cpp
 
 exp3: ersatz.o
-	$(CC) -I. -o $(EXPBIN)exp3 ersatz.o $(EXPSRC)exp3.c
+	$(CC) -I. -g -o $(EXPBIN)exp3 ersatz.o $(EXPSRC)exp3.c
+
+exp4:
+	$(CC) -g -lcrypt -o $(EXPBIN)exp4 $(EXPSRC)exp4.c

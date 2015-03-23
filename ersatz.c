@@ -222,7 +222,6 @@ int py_ersatz_hash(char *password, char *ersatz_salt, char *out_hash)
 		if(ersatz_salt[i] == '+')
 			ersatz_salt[i] = '.';
 	
-	
 	/* take a sha-512 hash */
 	crypt_set_format("sha512");
 	strcpy(out_hash, crypt(hmac_digest, ersatz_salt));
@@ -255,8 +254,6 @@ int py_ersatz_pw_check(char *password, char *ersatz_payload)
 	}
 }
 
-#define KGRN "\x1B[32m"
-#define RESET "\033[0m"
 char * ersatz_word_generator(void)
 {
 	srand(time(NULL));
@@ -264,7 +261,7 @@ char * ersatz_word_generator(void)
 	if(RANDOM_ERSATZ_WORD == 1)
 	{
 		if(PRINT_GEN == 1)
-			printf("Ersatz Password: " KGRN  "%s\n" RESET, ersatz_words[r]);
+			printf("Ersatz Password: " KGRN  "%s \n" RESET, ersatz_words[r]);
 		return ersatz_words[r];
 	}
 	else

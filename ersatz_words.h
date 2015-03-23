@@ -3,9 +3,14 @@
 
 #define RANDOM_ERSATZ_WORD 1
 #define PRINT_GEN 1
-#define ERSATZ_WORDS_SIZE 15788
 
 //from poslarchive.com/math/
+
+#ifdef SHORT_GEN_LIST
+ #define ERSATZ_WORDS_SIZE 5
+ char * ersatz_words[] = {"short123", "easypw", "batman", "letmein", "pass123"};
+#else
+ #define ERSATZ_WORDS_SIZE 15788
 char * ersatz_words [] = 
 {
 "aahing", "aaliis", "aarrgh", "abacas", "abacus", "abakas", "abamps", "abased", "abaser", "abases",
@@ -1587,4 +1592,6 @@ char * ersatz_words [] =
 "zodiac", "zoecia", "zoftig", "zombie", "zombis", "zonary", "zonate", "zoners", "zoning", "zonked",
 "zonula", "zonule", "zooids", "zooier", "zoomed", "zoonal", "zooned", "zorils", "zoster", "zouave",
 "zounds", "zoysia", "zydeco", "zygoid", "zygoma", "zygose", "zygote", "zymase" };
+#endif
+
 #endif
