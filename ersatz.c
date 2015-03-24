@@ -38,6 +38,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <gperftools/profiler.h>
+#include <assert.h>
 #define b64_ntop __b64_ntop
 #define b64_pton __b64_pton
 
@@ -232,6 +233,7 @@ int py_ersatz_pw_check(char *password, char *ersatz_payload)
 {
 	/* copy over the ersatz payload and detokenize to
 	   get hash and salt values */
+	assert(strlen(ersatz_payload) < ERSATZ_DIGEST_LEN);
 	char ersatz_digest_tmp[ERSATZ_DIGEST_LEN];
 	strcpy(ersatz_digest_tmp, ersatz_payload);
 	strtok(ersatz_digest_tmp, "$");	//we don't need to store the hash type
@@ -241,11 +243,18 @@ int py_ersatz_pw_check(char *password, char *ersatz_payload)
 	/* calculate ersatz hash and compared with input */
 	char hash_check[ERSATZ_DIGEST_LEN];
 	py_ersatz_hash(password, salt, hash_check);
+	#ifdef DBUG
+	 printf("correct check\nhash_check=%s\nersatz_pl=%s\n", hash_check, ersatz_payload);
+    #endif
+
 	if(strcmp(hash_check, ersatz_payload) == 0)
 		return ERSATZ_CORRECT_PW;
 	else
 	{
 		/* check if input a ersatz pasword */
+	  #ifdef DBUG
+	    printf("ersatz check\nhash_check=%s\nersatz_pyl=%s\n", hash_check, crypt(password,salt));
+      #endif
 		strcpy(hash_check, crypt(password, salt));
 		if(strcmp(hash_check, ersatz_payload) == 0)
 			return ERSATZ_PW;
@@ -265,5 +274,9 @@ char * ersatz_word_generator(void)
 		return ersatz_words[r];
 	}
 	else
+	{
+		if(PRINT_GEN == 1)
+			printf("Ersatz Password: " KGRN  "ersatz\n" RESET);
 		return "ersatz";
+	}
 }

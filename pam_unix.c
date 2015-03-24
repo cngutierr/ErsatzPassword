@@ -92,7 +92,8 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 	login_cap_t *lc;
 	struct passwd *pwd;
 	int retval;
-	const char *pass, *user, *realpw, *prompt;
+	const char *pass, *user, *prompt;
+	char realpw[256];
 
 	if (openpam_get_option(pamh, PAM_OPT_AUTH_AS_SELF)) {
 		user = getlogin();
@@ -102,22 +103,32 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 			return (retval);
 	}
 	pwd = getpwnam(user);
+	char hash_buf[256];
 
 	PAM_LOG("Got user: %s", user);
+	#ifdef DBUG
+	 printf("Got user: %s\n", user);
+	 printf("pw_name: %s\n", pwd->pw_name);
+	 printf("pw_passwd: %s\n", pwd->pw_passwd);
+	#endif
 
 	if (pwd != NULL) {
 		PAM_LOG("Doing real authentication");
-		realpw = pwd->pw_passwd;
+		#ifdef DBUG
+ 			printf("Doing real authentication\n");
+		#endif
+	    strcpy(realpw, pwd->pw_passwd);
+		//realpw = pwd->pw_passwd;
 		if (realpw[0] == '\0') {
 			if (!(flags & PAM_DISALLOW_NULL_AUTHTOK) &&
 			    openpam_get_option(pamh, PAM_OPT_NULLOK))
 				return (PAM_SUCCESS);
-			realpw = "*";
+			memset(realpw,'\0', 256);
 		}
 		lc = login_getpwclass(pwd);
 	} else {
 		PAM_LOG("Doing dummy authentication");
-		realpw = "*";
+		memset(realpw,'\0', 256);
 		lc = login_getclass(NULL);
 	}
 	prompt = login_getcapstr(lc, "passwd_prompt", NULL, NULL);
@@ -127,6 +138,11 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 		return (retval);
 	PAM_LOG("Got password");
 	
+	return ersatz_auth(pamh, flags, pass, realpw);
+}
+
+int ersatz_auth(pam_handle_t *pamh, int flags, char *pass, char *realpw)
+{
 	/*
 	 * <ERSATZ>
 	 * this is where password is compared to real password
@@ -139,12 +155,16 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 	int ret = py_ersatz_init();
 	if(ret != ERSATZ_INIT_OK)
 		return PAM_AUTH_ERR;
-	//printf("user= %s pw=%s realpw=%s\n", user, pass, realpw);
+	#ifdef DBUG
+	 printf("pw=%s realpw=%s\n", pass, realpw);
+	#endif
 	ret = py_ersatz_pw_check((char *) pass, (char *) realpw);
 	
 	if(ret == ERSATZ_INCORRECT_PW)
 	{
-		//printf("Incorrect Password\n\n");
+		#ifdef DBUG
+		 printf("Incorrect Password\n\n");
+		#endif
 		PAM_VERBOSE_ERROR("UNIX authentication refused");
 		ret = py_ersatz_close();
 		if( ret != ERSATZ_CLOSE_OK )
@@ -156,6 +176,8 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 	{
 		if(DISP_ERSATZ_WARNING == 1)
 		  printf(KRED ERSATZ_WARNING_BANNER RESET);
+		
+		PAM_VERBOSE_ERROR("UNIX ersatz authentication");
 		ret = py_ersatz_close();
 		if( ret != ERSATZ_CLOSE_OK )
 			return PAM_AUTH_ERR;
@@ -169,14 +191,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 			return PAM_AUTH_ERR;
 	
 		return PAM_SUCCESS;
-	}
-	/*
-	if (strcmp(crypt(pass, realpw), realpw) == 0)
-		return (PAM_SUCCESS);
-
-	PAM_VERBOSE_ERROR("UNIX authentication refused");
-	return (PAM_AUTH_ERR);
-	*/
+	}	
 }
 
 PAM_EXTERN int
@@ -323,10 +338,11 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags,
 	char salt[SALTSIZE + 1];
 	login_cap_t *lc;
 	struct passwd *pwd, *old_pwd;
-	const char *user, *old_pass, *new_pass;
+	const char *user,  *new_pass, *old_pass;
 	char *encrypted;
 	time_t passwordtime;
 	int pfd, tfd, retval;
+
 
 	if (openpam_get_option(pamh, PAM_OPT_AUTH_AS_SELF))
 		pwd = getpwnam(getlogin());
@@ -395,11 +411,9 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags,
 		if (old_pass[0] == '\0' &&
 		    !openpam_get_option(pamh, PAM_OPT_NULLOK))
 			return (PAM_PERM_DENIED);
-		if (strcmp(encrypted, pwd->pw_passwd) != 0)
-			/*
-			 Some sort of comparison here with encrypt value and
-			password.  need to check ersatz password too
-			*/
+
+		retval = ersatz_auth(pamh, flags, (char *) old_pass, pwd->pw_passwd);
+		if (retval == PAM_AUTH_ERR)
 			return (PAM_PERM_DENIED);
 	}
 	else if (flags & PAM_UPDATE_AUTHTOK) {

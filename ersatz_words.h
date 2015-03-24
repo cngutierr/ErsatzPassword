@@ -1,8 +1,6 @@
 #ifndef _ERSATZ_WORDS_H
 #define _ERSATZ_WORDS_H
 
-#define RANDOM_ERSATZ_WORD 1
-#define PRINT_GEN 1
 
 
 #ifdef SHORT_GEN_LIST

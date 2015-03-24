@@ -97,9 +97,30 @@ enum py_status
 
 
 /* configs */
+
+/*
+ * if DISP_ERSATZ_WARNING 1, print ERSATZ_WARNING_BANNER
+ */
 #define DISP_ERSATZ_WARNING 1
 #define ERSATZ_WARNING_BANNER "-----=====ERSATZ PASSWORD DETECTED=====-----\n"
+
+/* 
+ *  if SHORT_GEN_LIST is defined, select a ersatz word from a list of 20.
+ */
 #define SHORT_GEN_LIST
+
+/*
+ * if PRINT_GEN, print the generated ersatz pw
+ * if RANDOM_ERSATZ_WORD, select from a gen list, else, use "ersatz" as 
+ * the ersatz password
+ */
+#define PRINT_GEN 0
+#define RANDOM_ERSATZ_WORD 1
+
+/* 
+ *print debugging information if enabled
+ #define DBUG
+*/
 
 /*
  * Ersatz functions
