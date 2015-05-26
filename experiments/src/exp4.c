@@ -52,7 +52,7 @@ to64(char *s, long v, int n)
 
 /* Salt suitable for traditional DES and MD5 */
 //This is where the salt is made
-// some work will have to be done in order to change 
+// some work will have to be done in order to change
 // how the salt is decided according to the paper
 static void
 makesalt(char salt[SALTSIZE + 1])

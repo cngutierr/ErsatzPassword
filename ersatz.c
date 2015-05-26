@@ -42,15 +42,15 @@
 #define b64_ntop __b64_ntop
 #define b64_pton __b64_pton
 
-int b64_ntop(unsigned const char *src, 
-			 size_t srclen, char *target, 
+int b64_ntop(unsigned const char *src,
+			 size_t srclen, char *target,
 			 size_t targetsize);
-int b64_pton(unsigned const char *src, unsigned char *target, 
+int b64_pton(unsigned const char *src, unsigned char *target,
 			 size_t targetsize);
 PyObject *pyMod_pyhsm_base, *pyHSM;
 
 /*
- * 
+ *
  */
 int py_import_pyhsm_base(void)
 {
@@ -69,7 +69,7 @@ int py_hsm_init(void)
 {
 	PyObject *pyFunc_yhsm, *pyArgs, *pyStr_hsm_dev;
 	pyFunc_yhsm = PyObject_GetAttrString(pyMod_pyhsm_base, YHSM);
- 
+
 	if (pyFunc_yhsm && PyCallable_Check(pyFunc_yhsm))
 	{
         pyArgs = PyTuple_New(1);
@@ -87,7 +87,7 @@ int py_hsm_init(void)
 int py_hsm_unlock(void)
 {
 	PyObject *pyFunc_unlock = PyObject_GetAttrString(pyHSM, UNLOCK);
-	
+
 	if(pyFunc_unlock && PyCallable_Check(pyFunc_unlock))
 	{
 		PyObject_CallObject(pyFunc_unlock, NULL);
@@ -145,11 +145,11 @@ int py_hsm_hmac(char *input_str, char *out_hash)
 		PyTuple_SetItem(pyArgs_hmac, 0, pyInt_key_handler);
 		PyTuple_SetItem(pyArgs_hmac, 1, pyStr_input);
 		tmp=PyObject_CallObject(pyFunc_hmac, pyArgs_hmac);
-		
+
 		//exec
 		pyFunc_hmac = PyObject_GetAttrString(tmp, EXECUTE);
 		tmp=PyObject_CallObject(pyFunc_hmac, NULL);
-		
+
 		pyFunc_hmac = PyObject_GetAttrString(tmp, GET_HASH);
 		tmp = PyObject_CallObject(pyFunc_hmac, NULL);
 		char *buff = PyString_AsString(tmp);
@@ -172,7 +172,7 @@ int py_ersatz_salt(char *password, char *ersatz_pw, char *out_salt)
 	/* HDF on password */
 	char hmac_digest[HMAC_LEN];
 	int ret = py_hsm_hmac(password, hmac_digest);
-	
+
 	if(ret != HSM_HMAC_OK)
 		return ERSATZ_SALT_FAIL;
 
@@ -182,13 +182,13 @@ int py_ersatz_salt(char *password, char *ersatz_pw, char *out_salt)
 	char ersatz_pw_padded[HMAC_LEN];
 	memset(ersatz_pw_padded, 0, HMAC_LEN);
 	strcpy(ersatz_pw_padded, ersatz_pw);
-	
+
 	/* xor the hmac_digest and padded ersatz  */
 	char raw_salt[HMAC_LEN];
 	int i;
 	for(i = 0; i < HMAC_LEN; i++)
 		raw_salt[i] = hmac_digest[i] ^ ersatz_pw_padded[i];
-	/* encode base64, replace with '+' with '.' to maintain 
+	/* encode base64, replace with '+' with '.' to maintain
 	   formating in passwd.master. Also, trim the salt down */
 	b64_ntop((unsigned char*) raw_salt, RAW_SALT_LEN, out_salt, SALT_SIZE);
 	for(i = 0; i < SALT_SIZE; i++)
@@ -211,18 +211,18 @@ int py_ersatz_hash(char *password, char *ersatz_salt, char *out_hash)
 	for(i = 0; i < SALT_SIZE; i++)
 		if(ersatz_salt[i] == '.')
 			ersatz_salt[i] = '+';
-	
+
 	/* base64 decode ersatz salt   */
 	b64_pton((unsigned char *) ersatz_salt, decoded_salt, SALT_SIZE);
-	
+
 	/* xor the hmac digest with the salt */
 	for(i = 0; i < SALT_SIZE; i++)
 		hmac_digest[i] = hmac_digest[i] ^ decoded_salt[i];
-	
+
 	for(i = 0; i < SALT_SIZE; i++)
 		if(ersatz_salt[i] == '+')
 			ersatz_salt[i] = '.';
-	
+
 	/* take a sha-512 hash */
 	crypt_set_format("sha512");
 	strcpy(out_hash, crypt(hmac_digest, ersatz_salt));

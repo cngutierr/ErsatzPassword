@@ -53,7 +53,7 @@ def compute_ersatz_salt(password, ersatz_pw):
 	return b64e(sxor(hdf(password), encode_ersatz_pw(ersatz_pw)))#[0:16]
 
 def compute_ersatz_hash(password, salt):
-	return hash(sxor(hdf(password), b64d(salt))[0:16] + salt) 
+	return hash(sxor(hdf(password), b64d(salt))[0:16] + salt)
 
 def encode_ersatz_pw(password):
 	assert len(password) <= 12
@@ -68,7 +68,7 @@ def first_login(password, ersatz_pw):
 	updated_hash = compute_ersatz_hash(password, updated_salt)
 	logging.debug("Hash'  : %s (%i)", updated_hash, len(updated_hash))
 	#print "debug: " + b64e(sxor(hdf(password)[0:16], b64d(updated_salt))) + updated_salt
-	
+
 	logging.debug("%s == %s", sxor(hdf(password), b64d(updated_salt))[0:16], encode_ersatz_pw(ersatz_pw))
 	PWErsatz = collections.namedtuple('PWErsatz', ["salt_prime", "hash_prime"])
 	return PWErsatz(updated_salt, updated_hash)
@@ -106,7 +106,7 @@ def main():
 	for l in range(1,64):
 		print "\tpw = '%s' (%i)" %(longPW[0:l], l)
 		PWErsatzEntry = first_login(longPW[0:l], test_ersatz)
-		
+
 		ret = verify_ersatz_login(longPW[0:l], PWErsatzEntry)
 		assert ret == PASSWORD_CORRECT
 		ret = verify_ersatz_login(test_ersatz, PWErsatzEntry)
@@ -115,7 +115,7 @@ def main():
 		assert ret == PASSWORD_INCORRECT
 
 	longErsatz = 'abcdefghijklmnopqrstuvwxyz01234567890!@#$%^&*()_+{}|:"<>?'
-	print 'Testing: Ersatz len'	
+	print 'Testing: Ersatz len'
 	for l in range(1,64):
 		print "\tersatz = '%s' (%i)" %(longErsatz[0:l], l)
 		PWErsatzEntry = first_login(test_password, longErsatz[0:l])
@@ -125,7 +125,7 @@ def main():
 		assert ret == PASSWORD_ERSATZ
 		ret = verify_ersatz_login("incorrect", PWErsatzEntry)
 		assert ret == PASSWORD_INCORRECT
-		
+
 
 if __name__ == "__main__":
 	main()

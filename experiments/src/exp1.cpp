@@ -49,13 +49,13 @@ static struct pam_conv conv = {openpam_ttyconv, NULL};
 
 
 //compile with g++48 -lpam -o exp1 exp1.cpp
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 	if(argc < 2)
 	{
 		printf("Experiment 1 - Enrollment Latency\n");
 		printf("usage: %s <username> <new_password> \n", argv[0]);
-		return 0; 
+		return 0;
 	}
 	pam_handle_t *pamh = NULL;  /** PAM data structure **/
 	int retval;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	elp_time += (t2.tv_usec - t1.tv_usec) / 1000.0;
 	sum += elp_time;
 	printf("%f\n", elp_time);
-	if (retval != PAM_SUCCESS) 
+	if (retval != PAM_SUCCESS)
 		fprintf(stderr, "stderr: %s\n", pam_strerror(pamh, retval));
 }
 
