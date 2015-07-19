@@ -1,0 +1,48 @@
+The code found here replaces "passwd.c" in openldap2.4.40/libraries/liblutil/.
+The code relies on the ersatz library in order to compile. The goal is to 
+create an ldap server that authenticates users with valid passwords and triggers
+alarms if a ersatz password is used. Currently, the library logs an event if a
+ersatz password is used. You can find a place holder in "passwd.c" to trigger
+alarms, messages, or anything else. 
+
+Building
+1. Copy Makefile and passwd.c to the openldap2.4.40 liblutil directory:
+cp openldap2.4.40/libraries/liblutil/Makefile Makefile.bak
+cp openldap2.4.40/libraries/liblutil/passwd.c passwd.c.bak
+cp Makefile openldap2.4.40/libraries/liblutil/
+cp passwd.c openldap2.4.40/libraries/liblutil/
+
+2. Copy ersatz.c, ersatz.h, and ersatz_words.h to the openldap2.4.40 liblutil
+   directory
+cp ersatz.* openldap2.4.40/libraries/liblutil/ 
+cp ersatz_words.h openldap2.4.40/libraries/liblutil/ 
+
+3. Run make in openldap2.4.40/libraries/liblutil/ and verify that it builds
+4. Run make and make install in openldap2.4.40.
+
+Testing
+Run the following command and type 123 as the password to see the library is
+working correctly:
+slappasswd -h \{CRYPT\} -c '$6$%.16s'
+You sould see:
+{CRYPT}$6$o1O2cizjqfK2qLmU$7v1ErC7vcSWMbCqnO3.hNc8l8/Ejr7y9FNmCCJsEpfwOGinuGhdUUxVnNZ5A2qVdMIy7dKj9e9VRbvQMwh7NL
+If you dont, make sure you built the ersatz library with the RANDOM_ERSATZ_WORD set to 0 to fix the ersatz password to "ersatz".
+
+Usage
+1. write/replace the following lines in  slapd.conf: 
+pssword-hash {CRYPT}
+password-crypt-salt-format "$6$%.16s"
+This will tell slapd the correct hash/salt format. 
+
+2. write/replace the following in ldap.conf
+pam_passwd crypt
+
+3. Create an ldap user with a hash generated with slappasswd as shown above. See
+example_user.dif for an example.
+
+4. On an LDAP client machine, log in with user created in step 3 using the
+ersatz password.
+
+5. On the LDAP server, view /var/log/auth.log. You should see an entry indicating that a user tried to log in with an ersatz password. 
+
+

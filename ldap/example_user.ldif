@@ -1,0 +1,27 @@
+#based on an example found at www.whitneytechnologies.com/?314
+dn: uid=tom,ou=People,dc=liars,dc=club
+objectClass: top
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: tom
+cn: tom
+sn: tom
+givenName: tom
+displayName: tom
+uidNumber: 5005
+gidNumber: 5005
+gecos: tom
+homeDirectory: /home/tom
+shadowFlag: 0
+shadowWarning: 7
+shadowMin: 8
+shadowMax: 999999
+mail: tom@liars.club
+postalCode: 12345
+homePhone: 1235551234
+title: Example Client
+postalAddress:
+initials: TC
+loginShell: /bin/bash
+userPassword: {CRYPT}$6$TVMIeR2aOHaEQZtX$XmfBLKbvImxO9qsJJgRqwhHgW/d4LkrBSAydWUioThXVjmL09Ye1/1nISDMnMffGE/LCjXveqpuipsi9gIKbL.
