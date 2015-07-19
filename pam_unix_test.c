@@ -43,13 +43,13 @@
 #include <sys/time.h>
 
 using namespace std;
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
 	int num_times = 1;
 	if(argc < 3)
 	{
 		printf("usage: %s <username> <password> [num time]\n", argv[0]);
-		return 0; 
+		return 0;
 	}
 	if(argc > 3)
 		num_times = atoi(argv[3]);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 		elp_time += (t2.tv_usec - t1.tv_usec) / 1000.0;
 		sum += elp_time;
 		printf("%f\n", elp_time);
-		if (retval != PAM_SUCCESS) 
+		if (retval != PAM_SUCCESS)
 			fprintf(stderr, "stderr: %s\n", pam_strerror(pamh, retval));
 	//	sleep(1);
 	}

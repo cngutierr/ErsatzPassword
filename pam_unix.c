@@ -137,7 +137,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags __unused,
 	if (retval != PAM_SUCCESS)
 		return (retval);
 	PAM_LOG("Got password");
-	
+
 	return ersatz_auth(pamh, flags, pass, realpw);
 }
 
@@ -159,7 +159,7 @@ int ersatz_auth(pam_handle_t *pamh, int flags, char *pass, char *realpw)
 	 printf("pw=%s realpw=%s\n", pass, realpw);
 	#endif
 	ret = py_ersatz_pw_check((char *) pass, (char *) realpw);
-	
+
 	if(ret == ERSATZ_INCORRECT_PW)
 	{
 		#ifdef DBUG
@@ -176,7 +176,7 @@ int ersatz_auth(pam_handle_t *pamh, int flags, char *pass, char *realpw)
 	{
 		if(DISP_ERSATZ_WARNING == 1)
 		  printf(KRED ERSATZ_WARNING_BANNER RESET);
-		
+
 		PAM_VERBOSE_ERROR("UNIX ersatz authentication");
 		ret = py_ersatz_close();
 		if( ret != ERSATZ_CLOSE_OK )
@@ -189,9 +189,9 @@ int ersatz_auth(pam_handle_t *pamh, int flags, char *pass, char *realpw)
 		ret = py_ersatz_close();
 		if( ret != ERSATZ_CLOSE_OK )
 			return PAM_AUTH_ERR;
-	
+
 		return PAM_SUCCESS;
-	}	
+	}
 }
 
 PAM_EXTERN int
@@ -450,13 +450,13 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags,
 		if (login_setcryptfmt(lc, password_hash, NULL) == NULL)
 			openpam_log(PAM_LOG_ERROR,
 			    "can't set password cipher, relying on default");
-		
+
 		/* set password expiry date */
 		pwd->pw_change = 0;
 		passwordtime = login_getcaptime(lc, "passwordtime", 0, 0);
 		if (passwordtime > 0)
 			pwd->pw_change = time(NULL) + passwordtime;
-		
+
 		login_close(lc);
 		/*
 		 * <ERSATZ>
@@ -472,7 +472,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags,
 			return PAM_SERVICE_ERR;
 		}
 
-		
+
 		//ret = py_ersatz_salt((char *) new_pass, (char *)"ersatz", salt);
 		char *ersatz_pw =ersatz_word_generator();
 		PAM_LOG("usr: %s, ersatz: %s", user, ersatz_pw);
@@ -573,7 +573,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags,
 
 /* Salt suitable for traditional DES and MD5 */
 //This is where the salt is made
-// some work will have to be done in order to change 
+// some work will have to be done in order to change
 // how the salt is decided according to the paper
 //static void
 //makesalt(char salt[SALTSIZE + 1])

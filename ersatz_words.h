@@ -5,7 +5,7 @@
 
 #ifdef SHORT_GEN_LIST
  #define ERSATZ_WORDS_SIZE 20
- char * ersatz_words[] = 
+ char * ersatz_words[] =
  {
 	 //some pw are taken from CBSNews "The 25 most common passwords of 2013"
 	 "jamesbond", "easyPW",   "batman",   "letmein",  "pw1234",
@@ -15,7 +15,7 @@
  };
 #else
  #define ERSATZ_WORDS_SIZE 15788
-char * ersatz_words [] = 
+char * ersatz_words [] =
 {
 //from poslarchive.com/math/
 "aahing", "aaliis", "aarrgh", "abacas", "abacus", "abakas", "abamps", "abased", "abaser", "abases",
