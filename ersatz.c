@@ -37,9 +37,8 @@
 #include "ersatz_words.h"
 #include <time.h>
 #include <stdlib.h>
-#include <gperftools/profiler.h>
 #include <assert.h>
-#define b64_ntop __b64_ntop
+#define b64_ntop __b64_ntop 
 #define b64_pton __b64_pton
 
 int b64_ntop(unsigned const char *src,
@@ -138,7 +137,6 @@ int py_hsm_hmac(char *input_str, char *out_hash)
 	PyObject *tmp;
 	if(pyFunc_hmac && PyCallable_Check(pyFunc_hmac))
 	{
-		//ProfilerStart("/tmp/hsm_hmac.log");
 		pyArgs_hmac = PyTuple_New(2);
         pyStr_input = PyString_FromString(input_str);
         pyInt_key_handler = PyInt_FromLong(KEY_HANDLER);
@@ -155,7 +153,6 @@ int py_hsm_hmac(char *input_str, char *out_hash)
 		char *buff = PyString_AsString(tmp);
 		strcpy(out_hash, buff);
 
-		//ProfilerStop();
 		return HSM_HMAC_OK;
 	}
 	else
@@ -224,7 +221,7 @@ int py_ersatz_hash(char *password, char *ersatz_salt, char *out_hash)
 			ersatz_salt[i] = '.';
 
 	/* take a sha-512 hash */
-	crypt_set_format("sha512");
+	crypt_set_format(CRYPT_HASH);
 	strcpy(out_hash, crypt(hmac_digest, ersatz_salt));
 	return ERSATZ_HASH_OK;
 }
@@ -257,7 +254,12 @@ int py_ersatz_pw_check(char *password, char *ersatz_payload)
       #endif
 		strcpy(hash_check, crypt(password, salt));
 		if(strcmp(hash_check, ersatz_payload) == 0)
+		{
+			openlog("ersatz_lib", 0, LOG_AUTH;
+			syslog(LOG_INFO, "%s", "Ersatz password entered!");
+			closelog();
 			return ERSATZ_PW;
+		}
 		else
 			return ERSATZ_INCORRECT_PW;
 	}

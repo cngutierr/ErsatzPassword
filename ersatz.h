@@ -36,6 +36,7 @@
 
 #ifndef _ersatz_h_
 #define _ersatz_h_
+#include <syslog.h>
 #include <python2.7/Python.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -76,7 +77,7 @@ enum py_status
  */
 #define PYHSM_BASE "pyhsm.base"
 #define YHSM "YHSM"
-#define HSM_DEVICE "/dev/cuaU1"
+#define HSM_DEVICE "/dev/cuaU0"
 #define UNLOCK "unlock"
 #define HMAC_SHA1 "hmac_sha1"
 #define KEY_HANDLER 0x1
@@ -85,7 +86,8 @@ enum py_status
 //16 chars
 #define SALT_SIZE 16
 #define HASH_SIZE 86
-#define ERSATZ_DIGEST_LEN 106
+/*1 type, 3 $, 16 salt, 86 hash */
+#define ERSATZ_DIGEST_LEN 107
 #define HMAC_LEN 20
 #define RAW_SALT_LEN 12
 
@@ -121,6 +123,11 @@ enum py_status
  *print debugging information if enabled
  #define DBUG
 */
+
+/*
+ * Define the type of hash to use for crypt
+ */
+#define CRYPT_HASH "SHA512"
 
 /*
  * Ersatz functions
