@@ -37,14 +37,9 @@ class ErsatzHashGenerator():
 			self.hash = self._compute_ersatz_hash(self.password)
 			
 	def verify(self, inPassword):
-		if self.saltString:
-			ersatzCheck = ab64_encode(self._formatPassword(inPassword))
-		else:
-			ersatzCheck = self._formatPassword(inPassword)
-		encodedPW = self._ersatzfy_input(inPassword)
-		if self.hashFunc.verify(encodedPW, self.hash):
+		if self.hashFunc.verify(self._ersatzfy_input(inPassword), self.hash):
 			return "True Password"
-		elif self.hashFunc.verify(ersatzCheck, self.hash):
+		elif self.hashFunc.verify(inPassword, self.hash):
 			return "Ersatz password"
 		else:
 			return "Incorrect Password"
@@ -60,16 +55,15 @@ class ErsatzHashGenerator():
 		'''
 		totalLen = len(password) + len(self._username) + 1
 		assert totalLen <= self._saltLen
-		formated_password = password + self.spacer + \
-								self._username +" " * (self._saltLen - totalLen)
-		assert len(formated_password) == self._saltLen
-		return formated_password
+		return password + self.spacer + self._username
 	
 	def _ersatzfy_input(self, inPassword):
 		if self.saltString:
-			return ab64_encode(self._sxor(self._hdf(inPassword), ab64_decode(self.salt))[0:self._saltLen])
+			return self._sxor(self._hdf(self._formatPassword(inPassword)),\
+							 ab64_decode(self.salt))[0:len(self.ersatzPassword)]
 		else:
-			return self._sxor(self._hdf(inPassword), self.salt)[0:self._saltLen]
+			return self._sxor(self._hdf(self._formatPassword(inPassword)), \
+							self.salt)[0:len(self.ersatzPassword)]
 	
 	def _compute_ersatz_salt(self, password, ersatz_password):
 		'''
@@ -77,13 +71,14 @@ class ErsatzHashGenerator():
 			Inputs
 				password - True user password
 				ersatz_pw- Fake user password
+			todo: remove the array cut 
 		'''
 		if self.saltString:
-			return ab64_encode(self._sxor(self._hdf(password),\
-						 self._formatPassword(ersatz_password))[0:12])
+			return ab64_encode(self._sxor(self._hdf(self._formatPassword(password)),\
+						 ersatz_password)[0:self._saltLen])
 		else:
-			return self._sxor(self._hdf(password), \
-						self._formatPassword(ersatz_password))[0:self._saltLen]
+			return self._sxor(self._hdf(self._formatPassword(password)),\
+							 ersatz_password)[0:self._saltLen]
 	
 	def _compute_ersatz_hash(self, inPassword):
 		'''
@@ -98,9 +93,9 @@ class ErsatzHashGenerator():
 	def _sxor(self,str1, str2):
 		#pad if they are not the same length
 		if len(str1) > len(str2):
-			str2 = str2 + ((len(str1)-len(str2))*'0')
+			str2 = str2 + ((len(str1)-len(str2))*'\0')
 		else:
-			str1 = str1 + ((len(str2)-len(str1))*'0')
+			str1 = str1 + ((len(str2)-len(str1))*'\0')
 		#xor two strings, code based on Mark Byers posted on stack overflow
 		return ''.join(chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(str1, str2))
 
