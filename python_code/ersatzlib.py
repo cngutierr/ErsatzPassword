@@ -63,7 +63,7 @@ class ErsatzHashGenerator():
 							 ab64_decode(self.salt))[0:len(self.ersatzPassword)]
 		else:
 			return self._sxor(self._hdf(self._formatPassword(inPassword)), \
-							self.salt)[0:len(self.ersatzPassword)]
+							self.salt)[0:self._saltLen]
 	
 	def _compute_ersatz_salt(self, password, ersatz_password):
 		'''
@@ -93,9 +93,9 @@ class ErsatzHashGenerator():
 	def _sxor(self,str1, str2):
 		#pad if they are not the same length
 		if len(str1) > len(str2):
-			str2 = str2 + ((len(str1)-len(str2))*'\0')
+			str2 = str2 + ((len(str1)-len(str2))*'')
 		else:
-			str1 = str1 + ((len(str2)-len(str1))*'\0')
+			str1 = str1 + ((len(str2)-len(str1))*'')
 		#xor two strings, code based on Mark Byers posted on stack overflow
 		return ''.join(chr(ord(c1) ^ ord(c2)) for c1, c2 in zip(str1, str2))
 
