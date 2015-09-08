@@ -1,12 +1,22 @@
 import pyhsm
 
 from passlib.utils import ab64_encode, ab64_decode
+from multiprocessing.pool import Pool
+
+def _multithreaded_helper(inputDict):
+	try: 
+		if inputDict["hashFunc"].verify(inputDict["inPassword"], inputDict["hashDigest"]):
+			return True
+		else:
+			return False
+	except:
+		return False
 
 class ErsatzHashGenerator():
 	spacer = '|' # placed in between username and password in HSM
 	def __init__(self,hashFunc, username, password, ersatzPassword, \
-				dev='/dev/tty.usbmodemfd121', hsmPassword='', \
-				hsm_key_handler=0x1,salt_len=16):
+				dev='/dev/tty.usbmodemfd1231', hsmPassword='', \
+				hsm_key_handler=0x1, salt_len=16, **kwargs):
 		
 		'''
 			Inits the hash to be used in creating ersatz password hashes
@@ -23,28 +33,54 @@ class ErsatzHashGenerator():
 		self._username = username
 		self.ersatzPassword = ersatzPassword
 		
+		self._hashKwargs = kwargs
+		
 		self._hsm = pyhsm.base.YHSM(device=dev, debug=False)
 		self._hsm.unlock(password=hsmPassword)
 		self._key_handler = hsm_key_handler
-		self.saltString = False
-		self.salt = self._compute_ersatz_salt(password, ersatzPassword)
-		try:
-			self.hash = self._compute_ersatz_hash(self.password)
-		except:
-			self.saltString = True
-			self._saltLen = 12
-			self.salt = self._compute_ersatz_salt(self.password, ersatzPassword)
-			self.hash = self._compute_ersatz_hash(self.password)
-			
+		self.saltString = True
+		self._saltLen = 12
+		self.salt = self._compute_ersatz_salt(self.password, ersatzPassword)
+		self.hash = self._compute_ersatz_hash(self.password)
+		
 	def verify(self, inPassword):
-		if self.hashFunc.verify(self._ersatzfy_input(inPassword), self.hash):
+		try: 
+			if self.hashFunc.verify(self._ersatzfy_input(inPassword), self.hash):
+				return "True Password"
+			elif self.hashFunc.verify(inPassword, self.hash):
+				return "Ersatz password"
+			else:
+				return "Incorrect Password"
+		#hack hack hack - fix this 
+		except:
+			if self.hashFunc.verify(inPassword, self.hash):
+				return "Ersatz password"
+			else:
+				return "Incorrect Password"
+			
+
+		
+	def multithreaded_verify(self, inPassword):
+		validCheck = self._ersatzfy_input(inPassword)
+		ersatzCheck = inPassword
+		
+		p = Pool(processes=2)
+		validCheckDic = {"inPassword":validCheck, "hashFunc":self.hashFunc, "hashDigest":self.hash}
+		ersatzCheckDic = {"inPassword":ersatzCheck, "hashFunc":self.hashFunc, "hashDigest":self.hash}
+		
+		inputs = [validCheckDic, ersatzCheckDic]
+		result = p.map(_multithreaded_helper, inputs)
+		p.close()
+		p.join()
+		
+		if result[0]:
 			return "True Password"
-		elif self.hashFunc.verify(inPassword, self.hash):
+		elif result[1]:
 			return "Ersatz password"
 		else:
 			return "Incorrect Password"
+
 		
-	
 	def _formatPassword(self,password):
 		'''
 			Forces the ersatz password to be length 12. 
@@ -58,13 +94,9 @@ class ErsatzHashGenerator():
 		return password + self.spacer + self._username
 	
 	def _ersatzfy_input(self, inPassword):
-		if self.saltString:
-			return self._sxor(self._hdf(self._formatPassword(inPassword)),\
+		return self._sxor(self._hdf(self._formatPassword(inPassword)),\
 							 ab64_decode(self.salt))[0:len(self.ersatzPassword)]
-		else:
-			return self._sxor(self._hdf(self._formatPassword(inPassword)), \
-							self.salt)[0:self._saltLen]
-	
+
 	def _compute_ersatz_salt(self, password, ersatz_password):
 		'''
 			Creates a ersatz salt
@@ -73,12 +105,9 @@ class ErsatzHashGenerator():
 				ersatz_pw- Fake user password
 			todo: remove the array cut 
 		'''
-		if self.saltString:
-			return ab64_encode(self._sxor(self._hdf(self._formatPassword(password)),\
+		return ab64_encode(self._sxor(self._hdf(self._formatPassword(password)),\
 						 ersatz_password)[0:self._saltLen])
-		else:
-			return self._sxor(self._hdf(self._formatPassword(password)),\
-							 ersatz_password)[0:self._saltLen]
+
 	
 	def _compute_ersatz_hash(self, inPassword):
 		'''
@@ -87,7 +116,7 @@ class ErsatzHashGenerator():
 				password  	- (str) True user password
 				salt 		- (str) Fake user password
 		'''
-		return self.hashFunc.encrypt(self._ersatzfy_input(inPassword), salt=self.salt)
+		return self.hashFunc.encrypt(self._ersatzfy_input(inPassword), salt=self.salt, **self._hashKwargs)
 
 	#helper functions
 	def _sxor(self,str1, str2):
