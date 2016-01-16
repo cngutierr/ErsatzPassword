@@ -3,6 +3,7 @@
 1. Download safeid from https://github.com/ace0/safeid commit d4fe9b8531a7a248068299e7420e8d9381042c1e
 2. Replace safeid.py with the safeid.py found with this document
 3. Make sure that the ersatz python library is in the path before running safeid.
+4. Download and run the pythia server from https://github.com/ace0/pythia
 
 ##Testing
 The following will test to see if everything is working properly. Note the output of "new" and replace where approriate. 
