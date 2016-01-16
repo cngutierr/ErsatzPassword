@@ -10,6 +10,7 @@ def time_ersatz_hash(hashFunc, username, realPW, ersatzPW, \
                       hashRounds, count):
     erh = ersatzlib.ErsatzHashGenerator(hashFunc, username, realPW, \
                                         ersatzPW, rounds=hashRounds)
+    erh.initSaltHash()
     saltTime = list()   
     for i in range(count):
         start = timeit.default_timer()

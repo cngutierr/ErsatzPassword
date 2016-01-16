@@ -15,7 +15,7 @@ def _multithreaded_helper(inputDict):
 class ErsatzHashGenerator():
 	spacer = '|' # placed in between username and password in HSM
 	def __init__(self,hashFunc, username, password, ersatzPassword, \
-				dev='/dev/tty.usbmodemfd1231', hsmPassword='', \
+				dev='/dev/ttyACM0', hsmPassword='', \
 				hsm_key_handler=0x1, salt_len=16, **kwargs):
 		
 		'''
@@ -24,7 +24,7 @@ class ErsatzHashGenerator():
 				hashFunc - a function to be used in hashing.
 		'''
 		#assert hasattr(hash,hashFunc)
-		assert (len(password) + 1) < salt_len
+		#assert (len(password) + 1) < salt_len
 		assert (len(ersatzPassword) + 1) < salt_len
 		self.hashFunc = hashFunc
 		self._saltLen = salt_len
@@ -38,9 +38,11 @@ class ErsatzHashGenerator():
 		self._hsm = pyhsm.base.YHSM(device=dev, debug=False)
 		self._hsm.unlock(password=hsmPassword)
 		self._key_handler = hsm_key_handler
+		
+	def initSaltHash(self):
 		self.saltString = True
 		self._saltLen = 12
-		self.salt = self._compute_ersatz_salt(self.password, ersatzPassword)
+		self.salt = self._compute_ersatz_salt(self.password, self.ersatzPassword)
 		self.hash = self._compute_ersatz_hash(self.password)
 		
 	def verify(self, inPassword):
@@ -106,7 +108,7 @@ class ErsatzHashGenerator():
 			todo: remove the array cut 
 		'''
 		return ab64_encode(self._sxor(self._hdf(self._formatPassword(password)),\
-						 ersatz_password)[0:self._saltLen])
+						 ersatz_password))
 
 	
 	def _compute_ersatz_hash(self, inPassword):
@@ -120,6 +122,7 @@ class ErsatzHashGenerator():
 
 	#helper functions
 	def _sxor(self,str1, str2):
+
 		#pad if they are not the same length
 		if len(str1) > len(str2):
 			str2 = str2 + ((len(str1)-len(str2))*'')
