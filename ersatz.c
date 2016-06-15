@@ -255,7 +255,7 @@ int py_ersatz_pw_check(char *password, char *ersatz_payload)
 		strcpy(hash_check, crypt(password, salt));
 		if(strcmp(hash_check, ersatz_payload) == 0)
 		{
-			openlog("ersatz_lib", 0, LOG_AUTH;
+			openlog("ersatz_lib", 0, LOG_AUTH);
 			syslog(LOG_INFO, "%s", "Ersatz password entered!");
 			closelog();
 			return ERSATZ_PW;
